@@ -1,6 +1,21 @@
 clear all
 close all
 
+
+%%
+
+% The script corresponding to the data selection used in manuscript 'Spontaneous transient brain states in EEG source space of disorders of consciousness'
+% The details could be found in the supplementary information and Fig. S1
+% variable 'data' is defined as a structure including resting-state data from 62 patients (column)
+% an EEGLAB toolbox is needed, which can be accessed in https://sccn.ucsd.edu/eeglab/index.php
+% the script used an algorithm named 'SOUND', details in Mutanen, T. P., Metsomaa, J., Liljander, S. & Ilmoniemi, R. J. 2018. Automatic and robust noise suppression in EEG and MEG: The SOUND algorithm. Neuroimage, 166, 135-151.
+% signal quality indexes of patients was fitted by two guassian distribution (gauss_model_2fit) to determine the threshold discarding outliers
+
+
+%  edit by Yang Bai 2021-06-22
+
+%%
+
 TOOLBOXPATH = ['...'];
 
 datapath='...';  % <- edit this line
@@ -37,14 +52,4 @@ data=sigmas_S;
 plotflg=1;  %%% plot the histogram and models
 [ res ] = gauss_model_2fit( data , plotflag )
 lowqualitysub=find(data>res.orig_th); %%% find out the subjects with lower signal quality
-
-
-
-
-
-
-
-
-
-
 
