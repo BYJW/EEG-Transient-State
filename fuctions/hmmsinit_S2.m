@@ -1,5 +1,17 @@
 function [hmmi,Gamma,Xi] = hmmsinit_S2(data,T,options,h)
+%%
+% The script was a modification from a HMMMAR toolbox function to initialisation before stochastic HMM variational inference
+% Please also refer to the original function: hmmmmar in the HMMMAR toolbox， provide by Diego Vidaurre, OHBA, University of Oxford (2015)
+% INPUTS
+% data: data (ROIs * time points), T (length of each session/epoch of single subject)
+% T             length of series
+% options       structure with the training options - see documentation in 
+%                       https://github.com/OHBA-analysis/HMM-MAR/wiki
+% h: template hmm model used for state transfer
+%
+%  edit by Yang Bai 2021-06-22
 
+%%
 %%%%% to do a initialization for the model training
 removesoptions;
 options = rmfield(options,'orders');
