@@ -3,6 +3,19 @@ clc
 close all
 
 
+
+%%
+
+% The script corresponding to the parcellation from source space dipoles into 42 ROIs used in manuscript 'Spontaneous transient brain states in EEG source space of disorders of consciousness'
+% a fieldtrip and OSL toolbox is needed, which can be accessed in https://www.fieldtriptoolbox.org/ and https://ohba-analysis.github.io/osl-docs/
+% the parcellation was done based on a template (fmri_d100_parcellation_with_3PCC_ips_reduced_2mm_ss5mm_ds8mm_adj.nii.gz), which can be accessed from https://github.com/OHBA-analysis/parcellations
+% This script takes core pipeline from OSL function: ROInets.get_node_tcs
+% The output is the ROIs * time series, ROIs include 42 nodes dependent on the parcellation basis
+
+%  edit by Yang Bai 2021-06-22
+
+
+%%
 outdir = '...'; % <- edit this line
 
 
@@ -10,7 +23,7 @@ TOOLBOXPATH = ['...'];
 addpath((fullfile(TOOLBOXPATH,filesep, 'fieldtrip')));
 ft_defaults % initialize fieldtrip
 
-%%
+%% OSL toolbox was needed, https://ohba-analysis.github.io/osl-docs/
 scriptdir = '...'; % <- edit this line
 addpath( fullfile(scriptdir,'toolboxes','osl','osl-core') );
 osl_startup
@@ -36,12 +49,14 @@ cfg.parameter = 'pow';
 source2 = ft_sourceinterpolate(cfg, functional, anatomical);
 sourcedata=source2.pow;
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% the following was modified from OSL function ROInets.get_node_tcs
 spatialBasis=p.parcelflag;
 voxelData=sourcedata;
 nParcels = ROInets.cols(spatialBasis);
 goodSamples=[1:size(voxelData,2)];
 top5pcInd = abs(spatialBasis) >= repmat(prctile(abs(spatialBasis), 95),[ROInets.rows(spatialBasis), 1]);
-for iParcel = nParcels:-1:1,
+for iParcel = nParcels:-1:1
     mapSign(iParcel) = sign(mean(spatialBasis(top5pcInd(:,iParcel), iParcel)));
 end%for
 scaledSpatialMaps = ROInets.scale_cols(spatialBasis, mapSign ./max(max(abs(spatialBasis), [], 1), eps));
@@ -51,7 +66,7 @@ temporalSTD = max(std(voxelData, [], 2), eps);
 voxelWeightings = zeros(size(spatialBasis)); % Preallocate the nvoxels x nparcels weight matrix      
 
 % find time-course for each spatial basis map
-for iParcel = nParcels:-1:1, % allocate memory on the fly
+for iParcel = nParcels:-1:1 % allocate memory on the fly
     thisMap     = scaledSpatialMaps(:, iParcel);
     parcelMask  = logical(thisMap);
 
@@ -67,7 +82,7 @@ for iParcel = nParcels:-1:1, % allocate memory on the fly
     maskThresh  = 0.5; % 0.5 is a decent arbitrary threshold chosen by Steve Smith and MJ after playing with various maps.
     thisMask    = thisMap(parcelMask) > maskThresh;   
 
-    if any(thisMask), % the mask is non-zero
+    if any(thisMask) % the mask is non-zero
         relativeWeighting = abs(U(thisMask)) ./sum(abs(U(thisMask)));
         TSsign  = sign(mean(U(thisMask)));
         TSscale = dot(relativeWeighting, temporalSTD(thisMask));       
