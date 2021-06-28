@@ -1,5 +1,13 @@
 function [ res ] = gauss_model_2fit( data , plotflag )
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% this function perform a guassian distribution estimation for data
+% input variable data: (1D) distribution need to be estimated
+% the function was a modification from an OSL toolbox: teh_graph_gmm_fit( S )
+% the function called functions (gmm, gmminit, gmmem, gmmactiv) from OSL toolbox, more details about OSL, please refer to https://ohba-analysis.github.io/osl-docs/
+% the output res include a field orig_th, giving the threshold to distinguish two guassian distribution
+
+%  edit by Yang Bai 2021-06-22
 
 
 res=[];
