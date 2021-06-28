@@ -1,5 +1,20 @@
 function [hmm,fehist,feterms,rho] = hmmstrain_S(Xin,T,hmm,info,options)
-% Stochastic HMM variational inference
+
+%%
+% The script was a modification from a HMMMAR toolbox function, to realize a state transfer analysis
+% Please also refer to the original function: hmmstrain in the HMMMAR toolbox， provide by Diego Vidaurre, OHBA, University of Oxford (2016)
+% INPUTS
+% Xin: cell with strings referring to the files containing each subject's data, 
+%       or cell with with matrices (time points x channels) with each
+%       subject's data
+% T: cell of vectors, where each element has the length of each trial per
+%       subject. Dimension of T{n} has to be (1 x nTrials)
+% options: HMM options for both the subject and the group runs
+%
+% %  edit by Yang Bai 2021-06-22
+%%
+
+
 N = length(Xin); K = length(hmm.state);
 X = loadfile(Xin{1},T{1},options); ndim = size(X,2); XW = [];
 orders = formorders(hmm.train.order,hmm.train.orderoffset,hmm.train.timelag,hmm.train.exptimelag);
