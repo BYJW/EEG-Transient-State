@@ -1,5 +1,19 @@
 
 function [hmm,info] = hmmsinit_S1(Xin,T,options,h)
+%%
+% The script was a modification from a HMMMAR toolbox function to initialisation before stochastic HMM variational inference
+% Please also refer to the original function: hmminit in the HMMMAR toolbox， provide by Diego Vidaurre, OHBA, University of Oxford (2018)
+% INPUTS
+% Xin: cell with strings referring to the files containing each subject's data, 
+%       or cell with with matrices (time points x channels) with each
+%       subject's data
+% T: cell of vectors, where each element has the length of each trial per
+%       subject. Dimension of T{n} has to be (1 x nTrials)
+% options: HMM options for both the subject and the group runs
+% h: template hmm model used for state transfer
+%
+%  edit by Yang Bai 2021-06-22
+%%
 
 N = length(T); K = options.K;
 X = loadfile(Xin{1},T{1},options); ndim = size(X,2);
