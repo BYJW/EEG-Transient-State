@@ -1,6 +1,30 @@
 function [hmm,Gamma,Xi,fehist] = hmmtrain_S(data,T,hmm,Gamma,residuals,fehist)
+%%
+% The script was a modification from a HMMMAR toolbox function, to realize a state transfer analysis
+% Please also refer to the original function: hmmstrain in the HMMMAR toolbox， provide by Diego Vidaurre, OHBA, University of Oxford (2018)
 %
-% Train Hidden Markov Model using using Variational Framework
+% INPUTS:
+%
+% data          observations - a struct with X (time series) and C (classes)
+% T             Number of time points for each time series
+% hmm           hmm structure with options specified in hmm.train
+% Gamma         Initial state courses
+% residuals     in case we train on residuals, the value of those.
+%
+% OUTPUTS
+% hmm           estimated HMMMAR model
+% Gamma         estimated p(state | data)
+% Xi            joint probability of past and future states conditioned on data
+% fehist        historic of the free energies across iterations
+%
+% hmm.Pi          - intial state probability
+% hmm.P           - state transition matrix
+% hmm.state(k).$$ - whatever parameters there are in the observation model
+%
+%  edit by Yang Bai 2021-06-22
+%%
+
+
 
 
 if nargin<6, fehist=[]; end
