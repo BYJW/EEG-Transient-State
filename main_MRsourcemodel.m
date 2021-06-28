@@ -2,6 +2,16 @@ clear all
 clc
 close all
 
+%%
+
+% The script corresponding to the individual MRI data preprocessing, beanforming source analysis
+% used in manuscript 'Spontaneous transient brain states in EEG source space of disorders of consciousness'
+% a fieldtrip and eeglab toolbox is needed, which can be accessed in https://www.fieldtriptoolbox.org/ and https://sccn.ucsd.edu/eeglab/index.php
+% the details of the processing pipeline could refer to https://www.fieldtriptoolbox.org/tutorial/sourcemodel/
+
+%  edit by Yang Bai 2021-06-22
+
+%%
 TOOLBOXPATH = ['...'];
 addpath((fullfile(TOOLBOXPATH,filesep, 'fieldtrip')));
 ft_defaults % initialize fieldtrip
