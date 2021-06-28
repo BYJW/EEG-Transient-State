@@ -1,42 +1,53 @@
+
+
 clear all
 clc
 close all
 
+%%
 
-%%  use the statistic test for feature selection
-features=[features_temporal,features_psd,features_connectivity];
-for i=1:size(features,2)
-[h,p(i)]=ttest2(features(1:numVS,i),features(numVS+1:size(features,1),i));
-end
-refeatures=features(:,find(p<0.01));
-feat=find(p<0.01);
- 
+% The script corresponding to the machine learning used in manuscript 'Spontaneous transient brain states in EEG source space of disorders of consciousness'
+% The machine learning structure could be found in the supplementary information Fig. S10
+% variable 'features' is defined as a matrix including 84 state-features (column) of 62 patients (row): 62*84
+% a extra toolbox is needed, which can be accessed in http://libpls.net/.
+
+%  edit by Yang Bai 2021-06-22
 %%   combined nested cross-validation with CARS-PLS-LDA model to classify the patients based on VS and MCS labels
 addpath('/PLStoolbox');
 precentest=10;  %%%% 10% for test, 90% for training
-groups = mod(1:size(refeatures,1),10);
-X=refeatures;
-y=ones(1,size(refeatures,1));
-y([length(y)-length(VSCRS)+1:end])=-1*ones(1,length(VSCRS));
+groups = mod(1:size(features,1),10);
+X=features;
+y=ones(1,size(features,1));
+y([1:length(VScrs)])=-1*ones(1,length(VScrs));
 
-loopnum=zeros(1,size(features,2));
-scoreresult=zeros(1,size(refeatures,1));
+numVS=37; %%%%%%%%%% number of VS/UWS patients
+
+scoreresult=zeros(1,size(features,1));
 accresult=zeros(1,precentest);
-for group=0:precentest-1
+
+for group=0:precentest-1  %%%%%%%%%% devide the patients into traning datasets and test, corresponding to the outer layer
     
 testk = find(groups==group);  
 calk = find(groups~=group);
 Xcal=X(calk,:);ycal=y(calk);
 Xtest=X(testk,:);ytest=y(testk);
-    
+
+%%%%%%%%%%%%%%%%%%% use the t-test to reduce the feature number
+VS_n=intersect([1:numVS],calk);
+MCS_n=intersect([numVS+1:size(X,1)],calk);
+p=[];
+for i=1:size(X,2)
+[h,p(i)]=ttest2(X(VS_n,i),X(MCS_n,i));
+end
+Xcal=Xcal(:,find(p<0.05));
+Xtest=Xtest(:,find(p<0.05));
+
+%%%%%%%%%%%%%%%%%%
 A=6;
 K=size(Xcal,2);  %%% leave one out
-% K=3; %%% 4 fold cross-validation
 method='center';
-%%%% variables selection and parameter optimization
+%%%% variables selection and parameter optimization on 50 times resampling
 CARS1=carsplslda(Xcal,ycal',A,K,50,method,0); % simplified version with random elements removed so that results can be exactly reproducible
-%%%%% the finaly selected variabiles
-loopnum(feat(CARS1.vsel))=loopnum(feat(CARS1.vsel))+ones(1,length(feat(CARS1.vsel)));
 %%%%% build the PLS-LDA model using the selected variables and the parameter
 XX=Xcal(:,CARS1.vsel);
 nLV=CARS1.optLV;
@@ -46,7 +57,7 @@ Xtest=Xtest(:,CARS1.vsel);
 Xtest=pretreat(Xtest,method,LDA.scale_para(1,:),LDA.scale_para(2,:));
 Ttest=Xtest*LDA.Wstar;
 testresult=Ttest*LDA.regcoef_lda_lv(1:end-1)+LDA.regcoef_lda_lv(end);
-scoreresult(testk)=testresult;
+scoreresult(testk)=testresult; %%%%%% predict scores of patients
 end
 accresult=sum(sign(scoreresult)==y)/length(y); 
 ROC=roccurve(scoreresult,y',0); %+++ ROC area.
