@@ -2,6 +2,17 @@ clear all
 clc
 close all
 
+%%
+
+% The script corresponding to the state inference and transfer analysis used in manuscript 'Spontaneous transient brain states in EEG source space of disorders of consciousness'
+% an OSL and HMM toolbox are needed, which can be accessed from https://ohba-analysis.github.io/osl-docs/ and https://github.com/OHBA-analysis/HMM-MAR/wiki
+% This script follows pipeline from Vidaurre et. al. Nat Commun, 2018: Vidaurre, D., Hunt, L. T., Quinn, A. J., Hunt, B. a. E., Brookes, M. J., Nobre, A. C. & Woolrich, M. W. 2018. Spontaneous cortical activity transiently organises into frequency specific phase-coupling networks. Nat Commun, 9, 2987.
+% The original pipeline on MEG analysis could be found from https://github.com/OHBA-analysis/HMM-MAR/tree/master/examples
+% 
+
+%  edit by Yang Bai 2021-06-22
+
+
 %% addin the toolboxs
 scriptdir = '...'; % <- edit this line
 addpath( fullfile( scriptdir , 'scripts' ) );
@@ -19,17 +30,17 @@ addpath(genpath( fullfile(scriptdir,'toolboxes','distributionPlot') ));
 
 %% reconstruct the data from all subjects and extract information
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  above are calculated with singal patient
+%  above are calculated with single patient
 %  next are calculated with all patient, need link all the data together
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-data = [];            % HMM ready dataset
-T_all=[];
-R_all=[];
+data = [];  % HMM ready dataset
+T_all=[];   % Length of each data
+R_all=[];   % location of the single subject data in the concatenated dataset
 T=[];
 R=[];
-for numsub=1:totalnum
+for numsub=1:totalnum  %%%% concatenate all the single data into a matrix to do state inference
 %%%%%%%%%%%%%%%%% load the parcellated sourcedata
-load(fullfile(outdir,[patientname '_paceldata_lcmv']));     
+load(fullfile(outdir,[' ... _paceldata_lcmv']));     
 nsamples(numsub) = size(paceldata,2);
 fs=250;
 Ltrials=triallength*fs;
@@ -92,11 +103,7 @@ options.BIGbase_weights = 0.9;
 
 [hmm, Gamma, ~, vpath] = hmmmar(data,T',options);
 
-%% the transfer state analysis
-%%% if you want to keep the posbility transition
-[Gamma,Xi] = hmmdecode(data_DOC,T_DOC,hmm,0);
-
-%%% if you don't to keep the posbility transition
+%% the transfer state analysis, using some scripts modified from HMMMAR toolbox
 h=load('hmm');
 h.hmm.P=[]; 
 h.hmm.Pi=[];
